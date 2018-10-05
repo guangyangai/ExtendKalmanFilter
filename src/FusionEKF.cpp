@@ -88,7 +88,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
             0, 0, 1, 0,
             0, 0, 0, 1;
       Hj_ = tools.CalculateJacobian(ekf_.x_);
-      ekf_.Init(&ekf_.x_, &ekf_.P_, &ekf_.F_, &Hj_, &R_radar_, &ekf_.Q_);
+      ekf_.Init(ekf_.x_, ekf_.P_, ekf_.F_, Hj_, R_radar_, ekf_.Q_);
       
     }
     else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
@@ -110,7 +110,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
                  0, 1, 0, 1,
                  0, 0, 1, 0,
                  0, 0, 0, 1;
-      ekf_.Init(&ekf_.x_, &ekf_.P_, &ekf_.F_, &H_laser_, &R_radar_, &ekf_.Q_);
+      ekf_.Init(ekf_.x_, ekf_.P_, ekf_.F_, H_laser_, R_radar_, ekf_.Q_);
     }
 
     // done initializing, no need to predict or update

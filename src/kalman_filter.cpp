@@ -1,8 +1,9 @@
 #include "kalman_filter.h"
+#include <iostream>
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
-
+using namespace std;
 // Please note that the Eigen library does not initialize 
 // VectorXd or MatrixXd objects with zeros upon creation.
 
@@ -58,28 +59,30 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   float vy = x_(3);
   float c1 = px*px+py*py;
   float c2 = sqrt(c1);
-  float c3 = atan2(py/px);
+  float c3 = atan2(py, px);
   if(fabs(c1) < 0.0001){
     cout << "UpdateEKF () - Error - Division by Zero" << endl;
     return;
   }
   float c4 = (px*vx+py*vy)/c2;
-  VectorXd x_transformed << c2, c3, c4;
+  VectorXd x_transformed(3);
+  x_transformed << c2, c3, c4;
   VectorXd y_ = z - x_transformed;
-  while(fabs(y(1)) > 2*M_PI){
-    if(y(1)>0){
-      y(1) = y(1) - 2*M_PI;
+  while(fabs(y_(1)) > 2*M_PI){
+    if(y_(1)>0){
+      y_(1) = y_(1) - 2*M_PI;
     }else{
-      y(1) = y(1) + 2*M_PI;
+      y_(1) = y_(1) + 2*M_PI;
     }  
   }
-  MatrixXd Hjt_ = Hj_.transpose();
-  MatrixXd S_ = Hj_ * P_ * Hjt_ + R_;
+  MatrixXd Ht_ = H_.transpose();
+  MatrixXd S_ = H_ * P_ * Ht_ + R_;
   MatrixXd Si_ = S_.inverse();
-  MatrixXd K_ =  P_ * Hjt_ * Si_;
+  MatrixXd K_ =  P_ * Ht_ * Si_;
 
   x_ = x_ + (K_ * y_);
-  I = MatrixXd::Identity(2, 2);
-  P_ = (I - K_ * Hj_) * P_;
+  long x_size = x_.size();
+  MatrixXd I = MatrixXd::Identity(x_size, x_size);
+  P_ = (I - K_ * H_) * P_;
 
 }
