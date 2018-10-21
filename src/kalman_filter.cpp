@@ -62,19 +62,20 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   float c3 = atan2(py, px);
   if(fabs(c1) < 0.0001){
     cout << "UpdateEKF () - Error - Division by Zero" << endl;
-    return;
+    c1 = 0.0001;
   }
   float c4 = (px*vx+py*vy)/c2;
   VectorXd x_transformed(3);
   x_transformed << c2, c3, c4;
   VectorXd y_ = z - x_transformed;
-  while(fabs(y_(1)) > 2*M_PI){
+  while(fabs(y_(1)) > M_PI){
     if(y_(1)>0){
-      y_(1) = y_(1) - 2*M_PI;
+      y_(1) -= 2 * M_PI;
     }else{
-      y_(1) = y_(1) + 2*M_PI;
+      y_(1) += 2 * M_PI;
     }  
   }
+  //H_ = tools.CalculateJacobian(x_);
   MatrixXd Ht_ = H_.transpose();
   MatrixXd S_ = H_ * P_ * Ht_ + R_;
   MatrixXd Si_ = S_.inverse();
